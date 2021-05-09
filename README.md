@@ -1,15 +1,15 @@
 The goal for my project was to create the application with simplicity in mind, that also felt fluid to use.
 
 **Tools**
-React
-Netlify, for hosting
-Axios, for API requests
+React, 
+Netlify, 
+Axios, 
 Material UI
 
 **Specified Features**
-Search and Nominate
-Notification For 5 Nominations
-Local Storage for Nominations
+Search and Nominate, 
+Notification For 5 Nominations, 
+Local Storage for Nominations, 
 Mobile Friendly 
 
 **Reflections**
