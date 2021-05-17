@@ -20,13 +20,15 @@ const App = () => {
   const [searchForClick, setSearchForClick] = useState("");
   const [loader, setLoader] = useState(false);
   let [count, setCount] = useState(0);
+  const [nominationArray, setNominationArray] = useState([]);
+
+  console.log("count:", count);
 
   const getMoviesHandler = async (searchValue) => {
     try {
       const response = await axios.get(
         "https://omdbapi.com/?apikey=e67a02f0&type=movie&s=" + searchValue
       );
-      console.log("Data from API:", response.data.Search);
       setLoader(true);
       setTimeout(function () {
         setLoader(false);
@@ -41,10 +43,11 @@ const App = () => {
     const retrievedObject = JSON.parse(
       localStorage.getItem("nominationDetailsLS")
     );
-    console.log("retrievedObject: ", retrievedObject);
-    setNominationDetailsLS(retrievedObject);
+    if (retrievedObject) {
+      setNominationDetailsLS(retrievedObject);
+      setNominationArray(retrievedObject);
+    }
     const retrievedCount = JSON.parse(localStorage.getItem("count"));
-    console.log("retrievedCount: ", retrievedCount);
     setCount(retrievedCount);
     if (retrievedObject) {
       retrievedObject.forEach((eachMovie) => {
@@ -132,7 +135,7 @@ const App = () => {
                         </h2>
                       </div>
                       <div className={classes.buttonContainer}>
-                        {!movie.Nominated ? (
+                        {!movie.Nominated || movie.Nominated === false ? (
                           <Button
                             variant="outlined"
                             color="primary"
@@ -147,7 +150,8 @@ const App = () => {
                                       ...eachMovie,
                                       Nominated: true,
                                     };
-                                    setCount((count = count + 1));
+                                    nominationArray.push(updatedMovie);
+                                    setCount(count++);
                                     setNominationDisplay(true);
                                     return updatedMovie;
                                   } else if (count >= 5) {
@@ -164,7 +168,7 @@ const App = () => {
                               setMovieDetails(updatedMovies);
                               localStorage.setItem(
                                 "nominationDetailsLS",
-                                JSON.stringify(updatedMovies)
+                                JSON.stringify(nominationArray)
                               );
                               localStorage.setItem(
                                 "count",
@@ -205,24 +209,44 @@ const App = () => {
                             variant="outlined"
                             color="secondary"
                             onClick={() => {
-                              const updatedMovies = nominationDetailsLS.map(
+                              const updatedMovies = nominationArray.filter(
+                                (eachMovie) => {
+                                  if (eachMovie.imdbID !== movie.imdbID) {
+                                    return eachMovie;
+                                  } else {
+                                    return null;
+                                  }
+                                }
+                              );
+
+                              const updatedMovieList = movieDetails.map(
                                 (eachMovie) => {
                                   if (eachMovie.imdbID === movie.imdbID) {
                                     const updatedMovie = {
                                       ...eachMovie,
                                       Nominated: false,
                                     };
-                                    setCount((count = count - 1));
-                                    if (count === 0) {
-                                      setNominationDisplay(false);
-                                    }
                                     return updatedMovie;
                                   } else {
                                     return eachMovie;
                                   }
                                 }
                               );
-                              setMovieDetails(updatedMovies);
+
+                              nominationArray.forEach((eachMovie) => {
+                                if (
+                                  eachMovie.imdbID === movie.imdbID &&
+                                  eachMovie.Nominated === true
+                                ) {
+                                  setCount(count--);
+                                  if (count <= 0) {
+                                    setNominationDisplay(false);
+                                  }
+                                }
+                              });
+
+                              setMovieDetails(updatedMovieList);
+                              setNominationArray(updatedMovies);
                               localStorage.setItem(
                                 "nominationDetailsLS",
                                 JSON.stringify(updatedMovies)
