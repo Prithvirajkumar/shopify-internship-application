@@ -22,8 +22,6 @@ const App = () => {
   let [count, setCount] = useState(0);
   const [nominationArray, setNominationArray] = useState([]);
 
-  console.log("count:", count);
-
   const getMoviesHandler = async (searchValue) => {
     try {
       const response = await axios.get(
